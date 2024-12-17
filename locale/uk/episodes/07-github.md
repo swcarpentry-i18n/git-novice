@@ -1,0 +1,476 @@
+---
+title: Віддалені репозиторії у GitHub
+teaching: 45
+exercises: 0
+---
+
+::::::::::::::::::::::::::::::::::::::: objectives
+
+- Зрозуміти, що таке віддалені репозиторії та чому вони корисні.
+- Навчитися надсилати до та отримувати зміни з віддаленого репозиторію.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::: questions
+
+- Як я можу поділитися своїми змінами з іншими через Інтернет?
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Контроль версій дійсно вступає у свою силу, коли ми починаємо співпрацювати з іншими людьми.  У нас вже є більша частина механізму для цього; єдине, чого не вистачає - це знати, як копіювати зміни з одного репозиторію в інший.
+
+Такі системи, як Git, дозволяють пересилати інформацію про зміни між будь-якими двома репозиторіями.  Однак на практиці найпростіше використовувати одну копію як центральний вузол у мережі репозиторіїв, і зберігати його в мережі, аніж на чиємусь ноутбуці.  Багато програмістів використовують послуги хостингу, такі як [GitHub](https://github.com), [Bitbucket](https://bitbucket.org) або [GitLab](https://gitlab.com/) щоб зберігати основні копії; ми розглянемо плюси та мінуси цього в [іншому епізоді](13-hosting.md).
+
+Ми почнемо з того, що поділимося зі світом
+змінами, які ми внесли до нашого поточного проєкту. З цією метою ми збираємося створити _віддалений_ репозиторій, який буде пов'язаний з нашим _локальним_ репозиторієм.
+
+## 1\. Створіть віддалений репозиторій
+
+Log in to [GitHub](https://github.com), then click on the icon in the top right corner to
+create a new repository called `recipes`:
+
+![](fig/github-create-repo-01.png){alt='The first step in creating a repository on GitHub: clicking the "create new" button'}
+
+Name your repository "recipes" and then click "Create Repository".
+
+Зауважте: оскільки цей репозиторій буде підʼєднано до локального репозиторію, він має бути порожнім. Залиште "Initialize this repository with a README" непозначеним, та оберіть "None" як опції для обох "Add .gitignore" та "Add a license". Дивіться вправу "Файли ліцензії та README" нижче для повного пояснення того, чому репозиторій повинен бути порожнім.
+
+![](fig/github-create-repo-02.png){alt='The second step in creating a repository on GitHub: filling out the new repository form to provide the repository name, and specify that neither a readme nor a license should be created'}
+
+Як тільки репозиторій створено, GitHub відображає сторінку з URL і певною інформацією про те, як налаштувати локальний репозиторій:
+
+![](fig/github-create-repo-03.png){alt='The summary page displayed by GitHub after a new repository has been created. It contains instructions for configuring the new GitHub repository as a git remote'}
+
+Насправді це робить наступне на сервері GitHub:
+
+```bash
+$ mkdir recipes
+$ cd recipes
+$ git init
+```
+
+If you remember back to the earlier [episode](04-changes.md) where we added and
+committed our earlier work on `guacamole.md`, we had a diagram of the local repository
+which looked like this:
+
+![](fig/git-staging-area.svg){alt='A diagram showing how "git add" registers changes in the staging area, while "git commit" moves changes from the staging area to the repository'}
+
+Тепер, коли ми маємо два репозиторії, нам потрібна така діаграма:
+
+![](fig/git-freshly-made-github-repo.svg){alt='A diagram illustrating how the GitHub "recipes" repository is also a git repository like our local repository, but that it is currently empty'}
+
+Note that our local repository still contains our earlier work on `guacamole.md`, but the
+remote repository on GitHub appears empty as it doesn't contain any files yet.
+
+## 2\. Підʼєднання локального репозиторію до віддаленого
+
+Тепер підключаємо два сховища одне до одного.  Ми робимо це вказуючи GitHub репозиторій у якості [віддаленого](../learners/reference.md#remote) для локального репозиторію.
+Домашня сторінка репозиторію на GitHub містить URL, який нам потрібен, щоб його ідентифікувати:
+
+![](fig/github-change-repo-string.png){alt='A screenshot showing that clicking on "SSH" will make GitHub provide the SSH URL for a repository instead of the HTTPS URL'}
+
+Натисніть на кнопку 'SSH', щоб змінити [протокол](../learners/reference.md#protocol) з HTTPS на SSH.
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## HTTPS в порівнянні з SSH
+
+Ми використовуємо тут SSH тому що, хоча він і вимагає додаткову конфігурацію, це є протокол безпеки, який широко використовується багатьма програмами.  Наведені нижче кроки описують SSH на мінімальному рівні, необхідному рівні для роботи з GitHub.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+![](fig/github-find-repo-string.png){alt='Clicking the "Copy to Clipboard" button on GitHub to obtain the repository\'s URL'}
+
+Copy that URL from the browser, go into the local `recipes` repository, and run
+this command:
+
+```bash
+$ git remote add origin git@github.com:alflin/recipes.git
+```
+
+Make sure to use the URL for your repository rather than Alfredo's: the only
+difference should be your username instead of `alflin`.
+
+`origin` - імʼя, яке використовується локально для позначення віддаленого репозиторію. Його можна було б назвати як завгодно, але `origin` - це домовленість, яка часто використовується за замовчуванням в git та GitHub, так що корисно дотримуватися її, якщо немає особливої причини це не робити.
+
+Ми можемо перевірити, що команда спрацювала за допомогою `git remote -v`:
+
+```bash
+$ git remote -v
+```
+
+```output
+origin   git@github.com:alflin/recipes.git (fetch)
+origin   git@github.com:alflin/recipes.git (push)
+```
+
+Детальніше віддалені репозиторії ми розглянемо у наступному епізоді, а поки поговоримо про те, як вони можуть бути використані для співпраці.
+
+## 3\. Необхідна інформація про SSH протокол та його налаштування
+
+Before Alfredo can connect to a remote repository, he needs to set up a way for his computer to authenticate with GitHub so it knows it's him trying to connect to his remote repository.
+
+Ми збираємось налаштувати метод, який зазвичай використовується багатьма різними службами для автентифікації доступу з командного рядка.  Цей метод називається Secure Shell Protocol (SSH).  SSH - це кріптографічний мережевий протокол, який дозволяє безпечний зв'язок між комп'ютерами через ненадійну комунікаційну мережу.
+
+SSH використовує так звану пару ключів. Ці два ключі працюють разом для надання доступу. Один ключ публічно відомий - він називається відкритим ключем, інший ключ називається приватним ключем, та має бути доступним тільки його власнику. Дуже логічні назви!
+
+Ви можете уявити відкритий ключ як навісний замок, від якого тільки у вас є ключ (тобто ваш приватний ключ), щоб відчинити його. Ви використовуєте свій відкритий ключ тоді, коли вам потрібно мати безпечний спосіб зв'язку, наприклад, щоб використовувати ваш обліковий запис на GitHub.  Тоді ви даєте GitHub цей замок (відкритий ключ) та кажете: "Заблокувати доступ до мого облікового запису таким чином, щоб тільки комп'ютери, які мають мій закритий ключ, могли розблокувати зв'язок та виконувати команди git від імені мого облікового запису на GitHub.”
+
+Те, що ми зараз зробимо - це мінімум, необхідний для налаштування SSH-ключів та додання відкритого ключа до вашого акаунту на GitHub.
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Подальша інформація про SSH
+
+Тепер ми розглянемо SSH та пари ключів більш глибоко і детально.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Перше, що ми зробимо - це перевіримо, чи необхідні налаштування вже були зроблені на комп'ютері, на якому ви працюєте зараз.  Тому що, зазвичай, ці налаштування треба зробити тільки один раз для кожного комп'ютера, а після цього про них можна забути.
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Тримайте ваші ключі у надійному місці
+
+Насправді, ви не повинні забувати про ваші SSH ключі, оскільки вони відповідають за безпеку вашого облікового запису. Корисно періодично перевіряти ваші приватні ключі. Це особливо важливо, якщо ви використовуєте декілька комп'ютерів для доступу до вашого облікового запису.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Ми запустимо команду `ls` (список), щоб перевірити, які пари ключів вже існують на вашому комп'ютері.
+
+```bash
+$ ls -al ~/.ssh
+```
+
+Ваш результат буде виглядати трохи інакше в залежності від того, чи був коли-небудь SSH налаштований на комп'ютері, який ви використовуєте, чи ні.
+
+Alfredo has not set up SSH on his computer, so his output is
+
+```output
+ls: cannot access '/c/Users/Alfredo/.ssh': No such file or directory
+```
+
+Якщо SSH вже налаштований на комп'ютері, який ви використовуєте, то ви побачите перелік пар відкритих та приватних ключів. Назви файлів будуть або `id_ed25519`/`id_ed25519.pub`, або `id_rsa`/`id_rsa.pub` у залежності від того, як ці пари ключів були створені.
+Since they don't exist on Alfredo's computer, he uses this command to create them.
+
+### 3.1 Створення пари ключів SSH
+
+To create an SSH key pair Alfredo uses this command, where the `-t` option specifies which type of algorithm to use and `-C` attaches a comment to the key (here, Alfredo's email):
+
+```bash
+$ ssh-keygen -t ed25519 -C "a.linguini@ratatouille.fr"
+```
+
+Якщо ви використовуєте старішу систему, яка не підтримує алгоритм Ed25519, то використовуйте: `$ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"`
+
+```output
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/c/Users/Alfredo/.ssh/id_ed25519):
+```
+
+Ми бажаємо використовувати імʼя та розташування файлу за замовчуванням, тому просто натисніть <kbd>Enter</kbd>.
+
+```output
+Created directory '/c/Users/Alfredo/.ssh'.
+Enter passphrase (empty for no passphrase):
+```
+
+Now, it is prompting Alfredo for a passphrase. Since he is using his kitchen's laptop that other people sometimes have access to, he wants to create a passphrase. Обов'язково використовуйте пароль, який можна запам'ятати, або збережіть пароль десь у надійному місці, оскільки тут немає опції «змінити мій пароль».
+Note that, when typing a passphrase on a terminal, there won't be any visual feedback of your typing.
+This is normal: your passphrase will be recorded even if you see nothing changing on your screen.
+
+```output
+Enter same passphrase again:
+```
+
+Після введення того ж самого пароля вдруге ми отримуємо підтвердження
+
+```output
+Your identification has been saved in /c/Users/Alfredo/.ssh/id_ed25519
+Your public key has been saved in /c/Users/Alfredo/.ssh/id_ed25519.pub
+The key fingerprint is:
+SHA256:SMSPIStNyA00KPxuYu94KpZgRAYjgt9g4BA4kFy3g1o a.linguini@ratatouille.fr
+The key's randomart image is:
++--[ED25519 256]--+
+|^B== o.          |
+|%*=.*.+          |
+|+=.E =.+         |
+| .=.+.o..        |
+|....  . S        |
+|.+ o             |
+|+ =              |
+|.o.o             |
+|oo+.             |
++----[SHA256]-----+
+```
+
+Насправді під "identification" тут мається на увазі приватний ключ. Ви ніколи не повинні ділитися ним з іншими.  На відміну від приватного ключа, відкритий ключ у цьому повідомленні так і називається - "public key".  Щодо "key fingerprint", він є коротшою версією відкритого ключа.
+
+Тепер, коли ми створили ключі SSH, відповідні файли будуть знайдені:
+
+```bash
+ls -al ~/.ssh
+```
+
+```output
+drwxr-xr-x 1 Alfredo   197121   0 Jul 16 14:48 ./
+drwxr-xr-x 1 Alfredo   197121   0 Jul 16 14:48 ../
+-rw-r--r-- 1 Alfredo   197121 419 Jul 16 14:48 id_ed25519
+-rw-r--r-- 1 Alfredo   197121 106 Jul 16 14:48 id_ed25519.pub
+```
+
+### 3.2 Копіювання відкритого ключа у GitHub
+
+Тепер ми маємо пару ключів SSH, та можемо запустити наступну команду, щоб перевірити, чи може GitHub дозволити нашу автентифікацію.
+
+```bash
+ssh -T git@github.com
+```
+
+```output
+The authenticity of host 'github.com (192.30.255.112)' can't be established.
+RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8.
+This key is not known by any other names
+Are you sure you want to continue connecting (yes/no/[fingerprint])? y
+Please type 'yes', 'no' or the fingerprint: yes
+Warning: Permanently added 'github.com' (RSA) to the list of known hosts.
+git@github.com: Permission denied (publickey).
+```
+
+Отже, ми забули, що нам спочатку потрібно надати GitHub наш відкритий ключ!
+
+По-перше, нам потрібно скопіювати відкритий ключ.  Не забудьте додати `.pub` в кінці цієї команди - в іншому випадку ви будете дивитись на приватний ключ.
+
+```bash
+cat ~/.ssh/id_ed25519.pub
+```
+
+```output
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDmRA3d51X0uu9wXek559gfn6UFNF69yZjChyBIU2qKI a.linguini@ratatouille.fr
+```
+
+Тепер, перейшовши до GitHub.com, натисніть на іконку свого облікового запису у верхньому правому куті, щоб відкрити відповідне меню.  Click "Settings", then on the
+settings page, click "SSH and GPG keys", on the left side "Access" menu. Далі натисніть "New SSH key" кнопку праворуч. Now,
+you can add the title (Alfredo uses the title "Alfredo's Kitchen Laptop" so he can remember where the original key pair
+files are located), paste your SSH key into the field, and click the "Add SSH key" to complete the setup.
+
+Тепер, коли ми усе налаштували, ми знову перевіримо нашу автентифікацію з командного рядка.
+
+```bash
+$ ssh -T git@github.com
+```
+
+```output
+Hi Alfredo! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+Добре! Цей результат підтверджує, що ключ SSH працює як очікується. Тепер ми готові завантажити нашу роботу до віддаленого репозиторію.
+
+## 4\. Завантаження локальних змін до віддаленого репозиторію
+
+Тепер, коли аутентифікація налаштована, ми можемо повернутися до віддаленого репозиторію.  Наступна команда завантажить зміни з нашого локального репозиторію до репозиторію на GitHub:
+
+```bash
+$ git push origin main
+```
+
+Since Alfredo set up a passphrase, it will prompt him for it.  Якщо ви не встановили пароль для свого ключа, то команда не буде його запитувати.
+
+```output
+Enumerating objects: 16, done.
+Counting objects: 100% (16/16), done.
+Delta compression using up to 8 threads.
+Compressing objects: 100% (11/11), done.
+Writing objects: 100% (16/16), 1.45 KiB | 372.00 KiB/s, done.
+Total 16 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), done.
+To https://github.com/alflin/recipes.git
+ * [new branch]      main -> main
+```
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Проксі-сервер
+
+Якщо мережа, до якої ви підключені, використовує проксі-сервер, то можливо, що ваша остання команда зазнала невдачі з повідомленням про помилку "Could not resolve hostname". Щоб розвʼязати цю проблему, потрібно проінформувати Git про проксі-сервер:
+
+```bash
+$ git config --global http.proxy http://user:password@proxy.url
+$ git config --global https.proxy https://user:password@proxy.url
+```
+
+Коли ви підключаєтеся до іншої мережі, яка не використовує проксі-сервер, вам буде потрібно відключити використання проксі у Git за допомогою наступних команд:
+
+```bash
+$ git config --global --unset http.proxy
+$ git config --global --unset https.proxy
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Менеджери паролів
+
+Якщо у вашій операційній системі налаштовано менеджер паролів, `git push` спробує використати його, коли йому знадобляться ваші імʼя користувача і пароль.  Наприклад, це є стандартною поведінкою Git Bash у Windows. Якщо ви бажаєте вводити своє ім\`я користувача та пароль в терміналі замість використання менеджеру паролів, то введіть:
+
+```bash
+$ unset SSH_ASKPASS
+```
+
+у терміналі, перед тим як виконати `git push`.  Незважаючи на імʼя змінної `SSH_ASKPASS`, [Git використовує значення `SSH_ASKPASS` для усіх методів автентифікації записів](https://git-scm.com/docs/gitcredentials#_requesting_credentials), тож ви можете відмінити `SSH_ASKPASS` незалежно від того, чи ви використовуєте Git через SSH або автентифікацію через https-протокол.
+
+Ви також можете додати `unset SSH_ASKPASS` в кінці вашого файлу `~/.bashrc`, щоб зробити запит імен користувачів та паролів стандартною поведінкою Git.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Тепер наші локальний та віддалений репозиторії перебувають у такому стані:
+
+![](fig/github-repo-after-first-push.svg){alt='A diagram showing how "git push origin" will push changes from the local repository to the remote, making the remote repository an exact copy of the local repository.'}
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Опція '-u'
+
+У документації ви можете іноді побачити використання `git push` з опцією `-u`.  Це є синонімом опції `--set-upstream-to` для команди `git branch` і використовується для зв`язку поточної гілки з віддаленою гілкою таким чином, щоб команда `git pull`могла надалі бути використана без будь-яких аргументів. Щоб зробити це, просто використайте`git push -u origin main\` один раз після налаштування віддаленого репозиторію.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Ми також можемо завантажувати зміни з віддаленого репозиторію до локального:
+
+```bash
+$ git pull origin main
+```
+
+```output
+From https://github.com/alflin/recipes
+ * branch            main     -> FETCH_HEAD
+Already up-to-date.
+```
+
+У цьому випадку ця команда не має ніякого ефекту, оскільки два репозиторії вже синхронізовані.  Але якщо хтось ще вніс якісь зміни до репозиторію на GitHub, то ця команда завантажить їх у наш локальний репозиторій.
+
+:::::::::::::::::::::::::::::::::::::::  challenge
+
+## Користування вебінтерфейсом GitHub
+
+Browse to your `recipes` repository on GitHub.
+Under the Code tab, find and click on the text that says "XX commits" (where "XX" is some number).
+Наведіть курсор та натисніть на три кнопки праворуч від кожного коміту.
+Яку інформацію ви можете отримати/вивчити за допомогою цих кнопок?
+Як би ви отримали ту саму інформацію в shell?
+
+:::::::::::::::  solution
+
+## Рішення
+
+Ліва кнопка (з зображенням буфера обміну) копіює повний ідентифікатор коміту до буфера обміну. В shell, `git log` покаже вам для кожного коміту його повний ідентифікатор.
+
+Коли ви натиснете на середню кнопку, ви побачите всі зміни, які були зроблені в цьому конкретному коміті. Зелені затінені лінії вказують на додавання, а червоні - видалення. В shell ми можемо зробити те ж саме за допомогою `git diff`. А саме, `git diff ID1..ID2`, де ID1 та ID2 - ідентифікатори комітів (наприклад, `git diff a3bf1e5..041e637`) покаже відмінності між цими двома комітами.
+
+Найправіша кнопка дозволяє переглянути всі файли в репозиторії під час цього коміту. Для того, щоб зробити це в shell, нам потрібно було б змінити стан файлів у репозиторії на їх стан під час відповідного коміту.
+Ми можемо зробити це за допомогою `git checkout ID`, де ID - ідентифікатор коміту, на який ми хочемо подивитися. Якщо ми це зробимо, нам потрібно пам'ятати про те, що після цього репозиторій потрібно повернути до попереднього стану!
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Завантаження файлів до GitHub у браузері
+
+Github також дозволяє нам уникнути використання командного рядка і завантажити файли безпосередньо до вашого репозиторію без необхідності залишати браузер. Для цього є два варіанти.
+Перший - ви можете натиснути кнопку "Upload files" на панелі інструментів у верхній частині переліку файлів. Другий - ви можете перетягнути файли з робочого столу до переліку файлів. Ви можете більше прочитати про це [на цій сторінці у GitHub](https://help.github.com/articles/adding-a-file-to-a-repository/).
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::  challenge
+
+## Показ дати у GitHub
+
+Створіть віддалений репозиторій на GitHub. Завантажте вміст вашого локального репозиторію до віддаленого. Зробіть нові зміни у вашому локальному репозиторії та завантажте їх теж. Перейдіть до щойно створеного на GitHub репозиторію і перевірте [дати модифікацїї](../learners/reference.md#timestamp) файлів. Як GitHub їх відображає, і чому?
+
+:::::::::::::::  solution
+
+## Рішення
+
+GitHub відображає дати у відносному форматі, який легко читається людиною (наприклад, "22 години тому" або "три тижні тому"). Однак, якщо ви наведете курсор на дату, ви можете побачити точний час, коли відбулася остання зміна файлу.
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::  challenge
+
+## Завантаження змін чи коміт змін?
+
+В цьому епізоді ми познайомилися з командою `git push`.
+Як `git push` відрізняється від `git commit`?
+
+:::::::::::::::  solution
+
+## Рішення
+
+Коли ми завантажуємо зміни, ми взаємодіємо з віддаленим репозиторієм, щоб додати до нього зміни, які ми зробили локально (часто для того, щоб поділитися змінами, які ми зробили, з іншими).
+Команда `git commit` оновлює лише локальний репозиторій.
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::  challenge
+
+## Файли ліцензії та README
+
+У цьому епізоді ми дізналися про створення віддаленого репозиторію на GitHub, але коли ми ініціалізували наш GitHub репозиторій, ми не додали `README.md` або файл ліцензії. Якби ми це зробили, що, на вашу думку, сталося, якби ми намагалися зв\`язати локальний та віддалений репозиторії?
+
+:::::::::::::::  solution
+
+## Відповідь
+
+У цьому випадку ми побачимо конфлікт злиття через неспоріднені історії. Коли GitHub створює файл `README.md`, він виконує коміт у віддаленому репозиторії. Коли ви намагаєтеся отримати зміни з віддаленого репозиторію до вашого локального, Git виявить, що вони мають історії, які не мають спільного походження, та відмовиться від злиття.
+
+```bash
+$ git pull origin main
+```
+
+```output
+warning: no common commits
+remote: Enumerating objects: 3, done.
+remote: Counting objects: 100% (3/3), done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 0
+Unpacking objects: 100% (3/3), done.
+From https://github.com/alflin/recipes
+ * branch            main     -> FETCH_HEAD
+ * [new branch]      main     -> origin/main
+fatal: refusing to merge unrelated histories
+```
+
+Ви можете змусити git об'єднати два сховища, використав опцію `--allow-unrelated-histories`.
+Будьте обережні, коли ви використовуєте цей параметр і уважно перевірте вміст локального і віддаленого репозиторіїв перед об'єднанням.
+
+```bash
+$ git pull --allow-unrelated-histories origin main
+```
+
+```output
+From https://github.com/alflin/recipes
+ * branch            main     -> FETCH_HEAD
+Merge made by the 'recursive' strategy.
+README.md | 1 +
+1 file changed, 1 insertion(+)
+create mode 100644 README.md
+```
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::: keypoints
+
+- Локальний репозиторій Git можна під'єднати до одного або декількох віддалених репозиторіїв.
+- Для підключення до віддалених репозиторіїв використовується протокол SSH.
+- `git push` копіює зміни з локального репозиторію до віддаленого репозиторію.
+- `git pull` копіює зміни з віддаленого репозиторію в локальний репозиторій.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::

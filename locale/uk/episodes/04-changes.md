@@ -1,0 +1,717 @@
+---
+title: Відстеження змін
+teaching: 20
+exercises: 0
+---
+
+::::::::::::::::::::::::::::::::::::::: objectives
+
+- Пройти цикл зміни-додавання-коміту для одного або декількох файлів.
+- Пояснити де зберігається інформація на кожному етапі цього циклу.
+- Пояснити різницю між інформативними та неінформативними повідомленнями комітів.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::: questions
+
+- Як зберегти зміни в Git?
+- Як перевірити стан свого репозиторію?
+- Як зробити нотатки про те, які зміни було внесено і чому?
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Спочатку переконаймося, що ми все ще у правильному каталозі.
+You should be in the `recipes` directory.
+
+```bash
+$ cd ~/Desktop/recipes
+```
+
+Let's create a file called `guacamole.md` that contains the basic structure of a recipe.
+Ми будемо використовувати редактор `nano` для редагування файлу; ви можете використовувати будь-який редактор, який вам подобається.
+Зокрема, це не обовʼязково повинен бути `core.editor`, який ви раніше вказали глобально. But remember, the steps to create or edit a new file will depend on the editor you choose (it might not be nano). Для довідки щодо текстових редакторів, дивіться ["Which Editor?"](https://swcarpentry.github.io/shell-novice/03-create.html#which-editor/) в уроці [The Unix Shell](https://swcarpentry.github.io/shell-novice/).
+
+```bash
+$ nano guacamole.md
+```
+
+Type the text below into the `guacamole.md` file:
+
+```output
+# Guacamole
+## Ingredients
+## Instructions
+```
+
+Save the file and exit your editor. Next, let’s verify that the file was properly created by running the list command (`ls`):
+
+```bash
+$ ls
+```
+
+```output
+guacamole.md
+```
+
+`guacamole.md` contains three lines, which we can see by running:
+
+```bash
+$ cat guacamole.md
+```
+
+```output
+# Guacamole
+## Ingredients
+## Instructions
+```
+
+Якщо ми знову перевіримо статус нашого проєкту, Git повідомляє нам, що він помітив новий файл:
+
+```bash
+$ git status
+```
+
+```output
+On branch main
+
+No commits yet
+
+Untracked files:
+   (use "git add <file>..." to include in what will be committed)
+
+	guacamole.md
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+Повідомлення "untracked files" означає, що в каталозі існує файл, який Git не відстежує.
+Ми можемо повідомити Git, що цей файл треба відстежувати за допомогою команди `git add`:
+
+```bash
+$ git add guacamole.md
+```
+
+та згодом переконатися, що все виглядає правильно:
+
+```bash
+$ git status
+```
+
+```output
+On branch main
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+	new file:   guacamole.md
+
+```
+
+Git now knows that it's supposed to keep track of `guacamole.md`,
+but it hasn't recorded these changes as a commit yet.
+Щоб зробити це, нам потрібно виконати ще одну команду:
+
+```bash
+$ git commit -m "Create a template for recipe"
+```
+
+```output
+[main (root-commit) f22b25e] Create a template for recipe
+ 1 file changed, 1 insertion(+)
+ create mode 100644 guacamole.md
+```
+
+Коли ми запускаємо `git commit`, Git бере все, що ми раніше запросили його зберегти за допомогою `git add`, та зберігає постійну копію цих змін у спеціальному каталозі `.git`.
+Ця постійна копія називається [commit](../learners/reference.md#commit)
+(або [revision](../learners/reference.md#revision)). У цьому прикладі коміт має скорочений ідентифікатор `f22b25e`. У вашого коміту може бути інший ідентифікатор.
+
+Ми використовуємо команду `-m` (від "message") щоб надати короткий, інформативний та конкретний коментар, який допоможе нам згадати пізніше про те, що ми зробили та чому.
+Якщо ми просто запустимо `git commit` без опції `-m`, Git запустить `nano` (або будь-який інший редактор, який ми вказали як `core.editor`), щоб ми могли написати довше повідомлення.
+
+[Гарні повідомлення комітів][commit-messages] починаються з короткого (\< 50 символів) тексту про зміни, внесені в коміт. Загалом, повідомлення має завершувати речення "If applied, this commit will" <commit message here> ("Якщо застосовано, цей коміт буде" <0>).
+Якщо ви хочете детальніше перейти до подробиць, додайте порожній рядок між першим рядком та вашими додатковими примітками. Використовуйте додаткові примітки, щоб пояснити, чому ви внесли зміни та/або яким буде їх вплив.
+
+Якщо ми тепер запустимо `git status`:
+
+```bash
+$ git status
+```
+
+```output
+On branch main
+nothing to commit, working tree clean
+```
+
+Git говорить нам, що поточний стан файлів відповідає їх стану, який збережений у репозиторії.
+Якщо ми хочемо знати, що саме ми зробили нещодавно - ми можемо попросити Git показати нам історію проєкту, використовуючи `git log`:
+
+```bash
+$ git log
+```
+
+```output
+commit f22b25e3233b4645dabd0d81e651fe074bd8e73b
+Author: Alfredo Linguini <a.linguini@ratatouille.fr>
+Date:   Thu Aug 22 09:51:46 2013 -0400
+
+    Create a template for recipe
+```
+
+`git log` виводить перелік усіх комітів, які були внесені до репозиторію, у зворотному хронологічному порядку.
+Для кожного коміту буде надруковано повний ідентифікатор коміту (який починається з тих же символів, що і скорочений ідентифікатор, попередньо надрукований командою `git commit`), автор коміту, дата його створення, і повідомлення Git, яке було додано під час запису коміту.
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Де зберігаються мої зміни?
+
+If we run `ls` at this point, we will still see just one file called `guacamole.md`.
+Це відбувається тому, що Git зберігає інформацію про історію файлів у спеціальному каталозі `.git`, згаданому раніше, щоб наша файлова система не засмічувалася (і щоб ми випадково не могли змінити або видалити стару версію).
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Now suppose Alfredo adds more information to the file.
+(Знову ж таки, ми будемо редагувати його за допомогою `nano`, і потім перевіряти його зміст за допомогою `cat`; ви можете користуватися іншим редактором, та можете не використовувати `cat`.)
+
+```bash
+$ nano guacamole.md
+$ cat guacamole.md
+```
+
+```output
+# Guacamole
+## Ingredients
+* avocado
+* lemon
+* salt
+## Instructions
+```
+
+Тепер, коли ми запускаємо `git status`, Git повідомляє нам, що файл, про який він вже знає, був змінений:
+
+```bash
+$ git status
+```
+
+```output
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+
+	modified:   guacamole.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+Ключова фраза - це останній рядок: "no changes added to commit".
+Ми змінили цей файл, але ми ще не зберегли їх (що ми робимо за допомогою `git commit`), та навіть не сказали Git, що ми маємо намір зберегти ці зміни у майбутньому (що ми робимо за допомогою `git add`).
+Тож зробімо це зараз. Хорошою рекомендацією є перегляд наших змін кожного разу перед їх збереженням. Це робиться за допомогою `git diff`.
+Результат показує нам відмінності між поточним станом файлу та його останньою збереженою версією:
+
+```bash
+$ git diff
+```
+
+```output
+diff --git a/guacamole.md b/guacamole.md
+index df0654a..315bf3a 100644
+--- a/guacamole.md
++++ b/guacamole.md
+@@ -1,3 +1,6 @@
+ # Guacamole
+ ## Ingredients
++* avocado
++* lemon
++* salt
+ ## Instructions
+```
+
+Результат цієї команди важко зрозуміти, тому що це насправді серія команд для таких інструментів, як редактори або `patch`, яка повідомляє їм, як змінити один файл за допомогою іншого.
+Якщо розділити цей результат на фрагменти:
+
+1. Перший рядок вказує на те, що результат цієї команди у Git подібний до Unix команди `diff`, яка порівнює стару та нову версії файлу.
+2. Другий рядок повідомляє які саме версії файлу Git порівнює; `df0654a` та `315bf3a` є унікальними ідентифікаторами цих версій.
+3. Третій та четвертий рядки ще раз показують назву файлу, що змінюється.
+4. Решта рядків найцікавіші, вони показують нам фактичні відмінності і рядки, у яких вони відбуваються.
+   Зокрема, значок `+` в першому стовпці вказує де ми додали рядок.
+
+Після того, як ми переглянули наші зміни, прийшов час зберегти їх:
+
+```bash
+$ git commit -m "Add basic guacamole's ingredients"
+$ git status
+```
+
+```output
+On branch main
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+
+	modified:   guacamole.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+Але це не спрацює: Git не буде додавати зміни, тому що ми не використали спочатку `git add`.
+Давайте це виправимо:
+
+```bash
+$ git add guacamole.md
+$ git commit -m "Add basic guacamole's ingredients"
+```
+
+```output
+[main 34961b1] Add basic guacamole's ingredient
+ 1 file changed, 3 insertions(+)
+```
+
+Git наполягає, щоб ми додали файли до набору змін, які ми хочемо записати, перед тим як ми зробимо коміт. Це дозволяє зберігати зміни поступово та обʼєднувати їх у логічні блоки, аніж у великі набори змін.
+Наприклад, припустимо, ми робимо коміт кількох цитат відповідних досліджень у нашій дисертації.
+Можливо, ми бажаємо зберегти ці зміни, та відповідні записи у бібліографії, але не зберігати деякі інші зміни в нашій роботі (наприклад, висновок, який ми ще не закінчили).
+
+Щоб це було можливо зробити, Git має спеціальну _зону стейджингу_ (staging area), де він відстежує речі, які були додані до поточного [набору змін (changeset)](../learners/reference.md#changeset) проте, ще не були збережені.
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Зона стейджингу (staging area)
+
+Якщо ви будете уявляти, ніби Git робить знімки змін протягом життя проєкту, то `git add` вказує що буде на знімку (додаючи речі в зоні стейджингу), а `git commit` після того насправді робить знімок, та назавжди зберігає його (як коміт).
+Якщо у зоні стейджингу нічого немає, то коли ви введете `git commit`, Git запропонує вам використати `git commit -a` або `git commit --all`, який ніби збирає разом всіх, щоб зробити групове фото!
+Однак майже завжди краще явним чином додати речі до зони стейджингу, тому що без цього ви можете випадково зберегти інші зміни, про які ви забули. (Повертаючись до порівняння з груповим фото, якщо ви використали команду "-а", до вашої фотографії може потрапити зайва людина!)
+Тому додавайте речі в зону стейджингу власноруч - > в іншому випадку вам може знадобитися шукати як використовувати "git undo commit" частіше, ніж вам хотілося б!
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+![](fig/git-staging-area.svg){alt='A diagram showing how "git add" registers changes in the staging area, while "git commit" moves changes from the staging area to the repository'}
+
+Подивімося, як наші зміни у файлі проходять шлях від текстового редактора до зони стейджингу і далі у довгострокове зберігання.
+First,
+we'll improve our recipe by changing 'lemon' to 'lime':
+
+```bash
+$ nano guacamole.md
+$ cat guacamole.md
+```
+
+```output
+# Guacamole
+## Ingredients
+* avocado
+* lime
+* salt
+## Instructions
+```
+
+```bash
+$ git diff
+```
+
+```output
+diff --git a/guacamole.md b/guacamole.md
+index 315bf3a..b36abfd 100644
+--- a/guacamole.md
++++ b/guacamole.md
+@@ -1,6 +1,6 @@
+ # Guacamole
+ ## Ingredients
+ * avocado
+-* lemon
++* lime
+ * salt
+ ## Instructions
+```
+
+So far, so good:
+we've replaced one line (shown with a `-` in the first column) with a new line
+(shown with a `+` in the first column).
+Тепер помістімо цю зміну у зону стейджингу та подивимося що після цього звітує `git diff`:
+
+```bash
+$ git add guacamole.md
+$ git diff
+```
+
+Результату немає: це виглядає ніби для Git немає різниці між тим, що вже було збережено назавжди та тим, що зараз міститься у робочій директорії.
+Проте, якщо ми зробимо наступне:
+
+```bash
+$ git diff --staged
+```
+
+```output
+diff --git a/guacamole.md b/guacamole.md
+index 315bf3a..b36abfd 100644
+--- a/guacamole.md
++++ b/guacamole.md
+@@ -1,6 +1,6 @@
+ # Guacamole
+ ## Ingredients
+ * avocado
+-* lemon
++* lime
+ * salt
+ ## Instructions
+```
+
+то ми побачимо різницю між останніми збереженими змінами та тими, які знаходяться в зоні стейджингу.
+Збережімо наші зміни:
+
+```bash
+$ git commit -m "Modify guacamole to the traditional recipe"
+```
+
+```output
+[main 005937f] Modify guacamole to the traditional recipe
+ 1 file changed, 1 insertion(+)
+```
+
+Перевіримо наш статус:
+
+```bash
+$ git status
+```
+
+```output
+On branch main
+nothing to commit, working tree clean
+```
+
+і подивимося на історію попередніх змін:
+
+```bash
+$ git log
+```
+
+```output
+commit 005937fbe2a98fb83f0ade869025dc2636b4dad5 (HEAD -> main)
+Author: Alfredo Linguini <a.linguini@ratatouille.fr>
+Date:   Thu Aug 22 10:14:07 2013 -0400
+
+    Modify guacamole to the traditional recipe
+
+commit 34961b159c27df3b475cfe4415d94a6d1fcd064d
+Author: Alfredo Linguini <a.linguini@ratatouille.fr>
+Date:   Thu Aug 22 10:07:21 2013 -0400
+
+    Add basic guacamole's ingredients
+
+commit f22b25e3233b4645dabd0d81e651fe074bd8e73b
+Author: Alfredo Linguini <a.linguini@ratatouille.fr>
+Date:   Thu Aug 22 09:51:46 2013 -0400
+
+    Create a template for recipe
+```
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Порівняння з підсвіткою змінених слів у рядках
+
+Інколи, наприклад, у випадку текстових документів, результат `diff` дуже важко зрозуміти. Саме тут `--color-words` опція для `git diff` є надзвичайно зручною, бо вона виділяє кольором змінені слова.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Перегляд історії змін за сторінками
+
+Коли розмір результату `git log` перевищує розмір вашого екрану, `git` використовує спеціальну програму "пейджер", щоб поділити результат на сторінки розміром з ваш екран.
+Після виклику "пейджера", ви помітите, що останній рядок на екрані - це `:`, замість звичайного запрошення командного рядка.
+
+- Натисніть <kbd>Q</kbd>, щоб вийти з пейджеру.
+- Натисніть <kbd>пробіл</kbd>, щоб перейти на наступну сторінку.
+- Щоб шукати `some_word` на всіх сторінках, натисніть <kbd>/</kbd> і введіть `some_word`.
+  Натисніть <kbd>N</kbd> для навігації між результатами пошуку.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Обмеження розміру зображуваної історії змін
+
+Щоб запобігти випадку, коли `git log` повністю займає ваш термінал, ви можете обмежувати кількість комітів які відображує Git, використовуючи опцію `-N`, де `N` - кількість комітів які б ви бажали бачити на екрані. Наприклад, якщо ви бажаєте побачити лише останній коміт, використовуйте команду
+
+```bash
+$ git log -1
+```
+
+```output
+commit 005937fbe2a98fb83f0ade869025dc2636b4dad5 (HEAD -> main)
+Author: Alfredo Linguini <a.linguini@ratatouille.fr>
+Date:   Thu Aug 22 10:14:07 2013 -0400
+
+   Modify guacamole to the traditional recipe
+```
+
+Ви також можете зменшити кількість інформації, використовуючи опцію `--oneline`:
+
+```bash
+$ git log --oneline
+```
+
+```output
+005937f (HEAD -> main) Modify guacamole to the traditional recipe
+34961b1 Add basic guacamole's ingredients
+f22b25e Create a template for recipe
+```
+
+Ви також можете комбінувати опцію `--oneline` з іншими опціями. Наступна корисна комбінація використовує опцію `--graph` для графічного зображення історії комітів за допомогою псевдографіки, вказуючи при цьому які коміти пов'язані з поточним `HEAD`, поточною гілкою `main`, або [іншими обʼєктами у репозиторії][git-references]':
+
+```bash
+$ git log --oneline --graph
+```
+
+```output
+* 005937f (HEAD -> main) Modify guacamole to the traditional recipe
+* 34961b1 Add basic guacamole's ingredients
+* f22b25e Create a template for recipe
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::::  callout
+
+## Каталоги
+
+Дві важливі речі, які ви повинні знати про каталоги в Git.
+
+1. Git не відстежує каталоги самостійно, тільки файли всередині них.
+   Спробуйте власноруч:
+
+```bash
+$ mkdir cakes
+$ git status
+$ git add cakes
+$ git status
+```
+
+Note, our newly created empty directory `cakes` does not appear in
+the list of untracked files even if we explicitly add it (_via_ `git add`) to our
+repository. Ось чому ви іноді бачите файли `.gitkeep` в інших порожніх каталогах. На відміну від `.gitignore`, ці файли не є особливими і їх єдиною метою є заповнити каталог, щоб Git додав його до репозиторію. Насправді ви можете назвати такі файли до вашої вподоби.
+
+2. Якщо ви створюєте каталог у вашому репозиторії Git і заповнюєте його файлами, ви можете додати всі файли в каталозі одразу:
+
+```bash
+$ git add <directory-with-files>
+```
+
+Спробуйте власноруч:
+
+```bash
+$ touch cakes/brownie cakes/lemon_drizzle
+$ git status
+$ git add cakes
+$ git status
+```
+
+Перш ніж рухатися далі, ми збережемо ці зміни.
+
+```bash
+$ git commit -m "Add some initial cakes"
+```
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+Для повторення: коли ми хочемо додати зміни до нашого репозиторію, спочатку нам потрібно додати змінені файли в зону стейджингу (`git add`) а потім зберегти заплановані зміни до репозиторію (`git commit`):
+
+![](fig/git-committing.svg){alt='A diagram showing two documents being separately staged using git add, before being combined into one commit using git commit'}
+
+:::::::::::::::::::::::::::::::::::::::  challenge
+
+## Вибір повідомлення коміту
+
+Which of the following commit messages would be most appropriate for the
+last commit made to `guacamole.md`?
+
+1. "Changes"
+2. "Changed lemon for lime"
+3. "Guacamole modified to the traditional recipe"
+
+:::::::::::::::  solution
+
+## Рішення
+
+Відповідь 1 є недостатньо детальною, а мета коміту неясна; відповідь 2 дублює результат команди "git diff" яка покаже зміни, зроблені у цьому коміті; відповідь 3 - оптимальна: коротка, інформативна, та імперативна.
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::  challenge
+
+## Збереження змін у Git
+
+Яка(які) з наведених нижче команд збережуть зміни у файлі `myfile.txt` до мого локального Git репозиторію?
+
+1. ```bash
+   $ git commit -m "my recent changes"
+   ```
+2. ```bash
+   $ git init myfile.txt
+   $ git commit -m "my recent changes"
+   ```
+3. ```bash
+   $ git add myfile.txt
+   $ git commit -m "my recent changes"
+   ```
+4. ```bash
+   $ git commit -m myfile.txt "my recent changes"
+   ```
+
+:::::::::::::::  solution
+
+## Рішення
+
+1. Створить коміт, лише якщо файли вже були у зоні стейджінгу.
+
+2. Намагатиметься створити новий репозиторій.
+
+3. Правильна відповідь: спочатку додайте файл до зони стейджингу, потім зробіть коміт.
+
+4. Спробує записати коміт файлу з назвою "my recent changes" з повідомленням myfile.txt.
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::  challenge
+
+## Коміт декількох файлів
+
+Зона стейджингу може зберігати зміни в будь-якій кількості файлів, які ви хочете записати в один коміт.
+
+1. Add some text to `guacamole.md` noting the rough price of the
+   ingredients.
+2. Create a new file `groceries.md` with a list of products and
+   their prices for different markets.
+3. Додайте зміни в обох файлах до зони стейджінгу, та зробіть коміт цих змін.
+
+:::::::::::::::  solution
+
+## Рішення
+
+First we make our changes to the `guacamole.md` and `groceries.md` files:
+
+```bash
+$ nano guacamole.md
+$ cat guacamole.md
+```
+
+```output
+# Guacamole
+## Ingredients
+* avocado (1.35)
+* lime (0.64)
+* salt (2)
+```
+
+```bash
+$ nano groceries.md
+$ cat groceries.md
+```
+
+```output
+# Market A
+* avocado: 1.35 per unit.
+* lime: 0.64 per unit
+* salt: 2 per kg
+```
+
+Now you can add both files to the staging area. We can do that in one line:
+
+```bash
+$ git add guacamole.md groceries.md
+```
+
+Or with multiple commands:
+
+```bash
+$ git add guacamole.md
+$ git add groceries.md
+```
+
+Now the files are ready to commit. You can check that using `git status`. If you are ready to commit use:
+
+```bash
+$ git commit -m "Write prices for ingredients and their source"
+```
+
+```output
+[main cc127c2]
+ Write prices for ingredients and their source
+ 2 files changed, 7 insertions(+)
+ create mode 100644 groceries.md
+```
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::  challenge
+
+## `bio` Repository
+
+- Create a new Git repository on your computer called `bio`.
+- Write a three-line biography for yourself in a file called `me.txt`,
+  commit your changes
+- Modify one line, add a fourth line
+- Display the differences
+  between its updated state and its original state.
+
+:::::::::::::::  solution
+
+## Solution
+
+If needed, move out of the `recipes` folder:
+
+```bash
+$ cd ..
+```
+
+Create a new folder called `bio` and 'move' into it:
+
+```bash
+$ mkdir bio
+$ cd bio
+```
+
+Initialise git:
+
+```bash
+$ git init
+```
+
+Create your biography file `me.txt` using `nano` or another text editor.
+Once in place, add and commit it to the repository:
+
+```bash
+$ git add me.txt
+$ git commit -m "Add biography file"
+```
+
+Modify the file as described (modify one line, add a fourth line).
+To display the differences
+between its updated state and its original state, use `git diff`:
+
+```bash
+$ git diff me.txt
+```
+
+:::::::::::::::::::::::::
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
+
+[commit-messages]: https://chris.beams.io/posts/git-commit/
+[git-references]: https://git-scm.com/book/en/v2/Git-Internals-Git-References
+
+:::::::::::::::::::::::::::::::::::::::: keypoints
+
+- `git status` shows the status of a repository.
+- Files can be stored in a project's working directory (which users see), the staging area (where the next commit is being built up) and the local repository (where commits are permanently recorded).
+- `git add` puts files in the staging area.
+- `git commit` saves the staged content as a new commit in the local repository.
+- Write a commit message that accurately describes your changes.
+
+::::::::::::::::::::::::::::::::::::::::::::::::::
